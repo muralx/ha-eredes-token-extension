@@ -1,0 +1,10 @@
+{
+  "name": "ha-eredes-token-extension",
+  "private": true,
+  "type": "module",
+  "license": "Apache-2.0",
+  "scripts": {
+    "check": "node --check extension/background.js && node --check extension/ha.js && node --check extension/options.js",
+    "test": "node --test test/*.test.js"
+  }
+}

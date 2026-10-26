@@ -1,0 +1,20 @@
+<!doctype html>
+<meta charset="utf-8">
+<title>E-Redes → Home Assistant</title>
+<style>
+  body { font: 14px system-ui, sans-serif; max-width: 34rem; margin: 2rem auto; padding: 0 1rem; }
+  label { display: block; margin-top: 1rem; font-weight: 600; }
+  input { width: 100%; padding: .5rem; box-sizing: border-box; }
+  button { margin-top: 1rem; padding: .5rem 1rem; }
+  #status { margin-top: 1rem; color: #555; white-space: pre-wrap; }
+</style>
+<h1>E-Redes token → Home Assistant</h1>
+<p>When you log in to <b>balcaodigital.e-redes.pt</b>, the fresh token is sent to Home Assistant's E-REDES integration automatically.</p>
+<label for="url">Home Assistant address</label>
+<input id="url" placeholder="http://homeassistant.local:8123">
+<label for="token">Home Assistant long-lived access token (admin user)</label>
+<input id="token" type="password" placeholder="Profile → Security → Long-lived access tokens">
+<button id="save">Save</button>
+<button id="send">Send current token now</button>
+<div id="status"></div>
+<script src="options.js"></script>

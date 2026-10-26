@@ -1,0 +1,30 @@
+{
+  "manifest_version": 3,
+  "name": "E-Redes token for Home Assistant",
+  "version": "1.0.0",
+  "description": "When you log in to the E-Redes Balcão Digital, sends the fresh access token to Home Assistant's E-REDES integration.",
+  "permissions": [
+    "cookies",
+    "storage",
+    "notifications"
+  ],
+  "host_permissions": [
+    "https://balcaodigital.e-redes.pt/*",
+    "https://*.e-redes.pt/*"
+  ],
+  "optional_host_permissions": [
+    "http://*/*",
+    "https://*/*"
+  ],
+  "background": {
+    "service_worker": "background.js",
+    "type": "module"
+  },
+  "options_page": "options.html",
+  "action": {
+    "default_title": "Send the E-Redes token to Home Assistant now"
+  },
+  "icons": {
+    "128": "icon.png"
+  }
+}
