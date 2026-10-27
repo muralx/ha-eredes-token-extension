@@ -33,3 +33,16 @@ export async function sendToken(haUrl, haToken, aat) {
   const why = result.errors ? JSON.stringify(result.errors) : result.reason || result.type;
   return { ok: false, error: `Home Assistant did not accept the token: ${why}` };
 }
+
+// When the aat (a JWT) expires, from its `exp` claim; null if unreadable.
+// Not verified — only used to tell the user when Home Assistant will stop
+// being able to fetch data.
+export function tokenExpiry(aat) {
+  try {
+    const part = aat.split(".")[1].replace(/-/g, "+").replace(/_/g, "/");
+    const { exp } = JSON.parse(atob(part.padEnd(part.length + ((4 - (part.length % 4)) % 4), "=")));
+    return Number.isFinite(exp) ? new Date(exp * 1000) : null;
+  } catch {
+    return null;
+  }
+}

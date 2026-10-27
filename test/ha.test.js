@@ -2,7 +2,7 @@
 import assert from "node:assert/strict";
 import { afterEach, test } from "node:test";
 
-import { sendToken } from "../extension/ha.js";
+import { sendToken, tokenExpiry } from "../extension/ha.js";
 
 const realFetch = globalThis.fetch;
 afterEach(() => {
@@ -69,4 +69,14 @@ test("fails clearly when the form has no CPE to reuse", async () => {
     "POST /api/config/config_entries/flow": () => [200, { type: "form", flow_id: "f1", data_schema: [] }],
   });
   await assert.rejects(sendToken("http://ha.local:8123", "secret", "aat"), /CPE/);
+});
+
+test("tokenExpiry reads the exp claim of a JWT", () => {
+  const payload = Buffer.from(JSON.stringify({ iss: "msauth-jwt", exp: 1793062236 })).toString("base64url");
+  assert.equal(tokenExpiry(`x.${payload}.y`).getTime(), 1793062236000);
+});
+
+test("tokenExpiry returns null for something that is not a JWT", () => {
+  assert.equal(tokenExpiry("not-a-jwt"), null);
+  assert.equal(tokenExpiry(`x.${Buffer.from("{}").toString("base64url")}.y`), null);
 });

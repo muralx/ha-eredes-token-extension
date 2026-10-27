@@ -1,4 +1,4 @@
-import { sendToken } from "./ha.js";
+import { sendToken, tokenExpiry } from "./ha.js";
 
 const PORTAL = "https://balcaodigital.e-redes.pt/";
 const COOKIE = "aat";
@@ -13,7 +13,8 @@ function notify(title, message) {
 }
 
 // Desktop notifications can be blocked, so the toolbar icon always shows the
-// outcome too: OK (green), ERR (red), ... (sending). Hover it for the details.
+// outcome too: OK (green), EXP (orange, token since expired), ERR (red),
+// ... (sending). Hover it for the details.
 function badge(text, color, detail) {
   chrome.action.setBadgeText({ text });
   if (color) chrome.action.setBadgeBackgroundColor({ color });
@@ -35,7 +36,11 @@ async function push(aat, { force = false } = {}) {
     if (r.ok) {
       await chrome.storage.local.set({ lastSent: aat, lastResult: `OK ${new Date().toLocaleString()}` });
       notify("E-Redes token sent to Home Assistant ✓", `${r.title} updated; missing data will be backfilled.`);
-      badge("OK", "#2e7d32", `Token accepted by Home Assistant (${new Date().toLocaleString()})`);
+      const exp = tokenExpiry(aat);
+      await chrome.storage.local.set({ expiresAt: exp ? exp.getTime() : null });
+      badge("OK", "#2e7d32", `Token accepted by Home Assistant (${new Date().toLocaleString()})` +
+        (exp ? `; it expires at ${exp.toLocaleTimeString()}` : ""));
+      if (exp) chrome.alarms.create("token-expired", { when: exp.getTime() });
     } else {
       await chrome.storage.local.set({ lastResult: `${r.error} (${new Date().toLocaleString()})` });
       notify("E-Redes → HA: token rejected", r.error);
@@ -76,4 +81,25 @@ chrome.action.onClicked.addListener(async () => {
 chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
   if (msg === "send-now") currentToken().then((aat) => (aat ? push(aat, { force: true }) : null)).then(() => reply(true));
   return true;
+});
+
+// The token lives about 90 minutes; after that Home Assistant cannot fetch
+// until the next login, so OK would be misleading.
+function showExpired(expiresAt) {
+  badge("EXP", "#ef6c00",
+    `Token expired at ${new Date(expiresAt).toLocaleString()}: Home Assistant cannot fetch E-Redes data ` +
+    "until you log in to balcaodigital.e-redes.pt again");
+}
+
+chrome.alarms.onAlarm.addListener(async ({ name }) => {
+  if (name !== "token-expired") return;
+  const { expiresAt } = await chrome.storage.local.get("expiresAt");
+  if (expiresAt && expiresAt <= Date.now()) showExpired(expiresAt);
+});
+
+// The badge does not survive a browser restart; restore EXP if it applies.
+chrome.runtime.onStartup.addListener(async () => {
+  const { expiresAt } = await chrome.storage.local.get("expiresAt");
+  if (expiresAt && expiresAt <= Date.now()) showExpired(expiresAt);
+  else if (expiresAt) chrome.alarms.create("token-expired", { when: expiresAt });
 });
