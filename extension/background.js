@@ -97,9 +97,18 @@ chrome.alarms.onAlarm.addListener(async ({ name }) => {
   if (expiresAt && expiresAt <= Date.now()) showExpired(expiresAt);
 });
 
-// The badge does not survive a browser restart; restore EXP if it applies.
-chrome.runtime.onStartup.addListener(async () => {
-  const { expiresAt } = await chrome.storage.local.get("expiresAt");
-  if (expiresAt && expiresAt <= Date.now()) showExpired(expiresAt);
-  else if (expiresAt) chrome.alarms.create("token-expired", { when: expiresAt });
-});
+// The badge does not survive a browser restart or an extension update/reload;
+// restore it from the last delivered token.
+async function restoreBadge() {
+  const { expiresAt, lastSent } = await chrome.storage.local.get(["expiresAt", "lastSent"]);
+  const exp = expiresAt || (lastSent && tokenExpiry(lastSent)?.getTime());
+  if (!exp) return;
+  if (exp <= Date.now()) showExpired(exp);
+  else {
+    badge("OK", "#2e7d32", `Token accepted by Home Assistant; it expires at ${new Date(exp).toLocaleTimeString()}`);
+    chrome.alarms.create("token-expired", { when: exp });
+  }
+}
+
+chrome.runtime.onStartup.addListener(restoreBadge);
+chrome.runtime.onInstalled.addListener(restoreBadge);
