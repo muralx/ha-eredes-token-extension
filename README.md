@@ -34,10 +34,13 @@ It does not bypass the login or the captcha: you still log in yourself.
 ## Use
 
 - Log in to balcaodigital.e-redes.pt. The token is sent automatically.
-- Or click the extension icon while logged in to send the current token.
+- Or click the extension icon: while logged in it sends the current token;
+  otherwise it opens the [login page](https://balcaodigital.e-redes.pt/login).
 
-The icon shows the result: **OK** (accepted), **ERR** (hover for the reason),
-**?** (not logged in to E-Redes) or **SET** (not configured yet). A desktop
+The icon shows the result: **OK** (accepted; hover for when it expires),
+**EXP** (the token has expired, about 90 minutes after login: Home Assistant
+cannot fetch until you log in again), **ERR** (hover for the reason), **?** (not
+logged in to E-Redes) or **SET** (not configured yet). A desktop
 notification is shown as well when your system allows it.
 
 Home Assistant validates the token before saving it. With the current
@@ -108,10 +111,14 @@ Não contorna o login nem o captcha: o login continua a ser feito por si.
 ### Utilizar
 
 - Faça login em balcaodigital.e-redes.pt: o token é enviado automaticamente.
-- Ou, com a sessão iniciada, clique no ícone da extensão.
+- Ou clique no ícone da extensão: com a sessão iniciada envia o token atual;
+  caso contrário abre a [página de login](https://balcaodigital.e-redes.pt/login).
 
-O ícone mostra o resultado: **OK** (aceite), **ERR** (passe o rato para ver o
-motivo), **?** (sem sessão na E-Redes) ou **SET** (ainda não configurada).
+O ícone mostra o resultado: **OK** (aceite; passe o rato para ver quando
+expira), **EXP** (o token expirou, cerca de 90 minutos após o login: o Home
+Assistant só volta a obter dados depois de novo login), **ERR** (passe o rato
+para ver o motivo), **?** (sem sessão na E-Redes) ou **SET** (ainda não
+configurada).
 
 O Home Assistant valida o token antes de o guardar. Com a versão atual da
 integração isso demora cerca de um minuto, porque a validação vai buscar dados

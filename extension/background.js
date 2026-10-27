@@ -1,6 +1,6 @@
 import { sendToken, tokenExpiry } from "./ha.js";
 
-const PORTAL = "https://balcaodigital.e-redes.pt/";
+const LOGIN = "https://balcaodigital.e-redes.pt/login";
 const COOKIE = "aat";
 
 async function settings() {
@@ -66,16 +66,20 @@ chrome.cookies.onChanged.addListener(({ cookie, removed }) => {
   if (!removed && cookie.name === COOKIE && cookie.domain.endsWith("e-redes.pt") && cookie.value) push(cookie.value);
 });
 
-// Toolbar button: send whatever token Chrome holds right now.
+// Toolbar button: send the token Chrome holds right now, or open the login
+// page when there is none or it has expired.
 chrome.action.onClicked.addListener(async () => {
   const aat = await currentToken();
-  if (aat) push(aat, { force: true });
-  else {
-    await chrome.storage.local.set({ lastResult: `No aat cookie found in Chrome (${new Date().toLocaleString()})` });
-    notify("E-Redes → HA: no token", "Log in to balcaodigital.e-redes.pt first, then click again.");
-    badge("?", "#c62828", "No E-Redes token in Chrome: log in to balcaodigital.e-redes.pt, then click again");
-    chrome.tabs.create({ url: PORTAL });
+  const exp = aat && tokenExpiry(aat);
+  if (aat && !(exp && exp.getTime() <= Date.now())) {
+    push(aat, { force: true });
+    return;
   }
+  if (!aat) {
+    await chrome.storage.local.set({ lastResult: `No aat cookie found in Chrome (${new Date().toLocaleString()})` });
+    badge("?", "#c62828", "No E-Redes token in Chrome: log in to balcaodigital.e-redes.pt");
+  }
+  chrome.tabs.create({ url: LOGIN });
 });
 
 chrome.runtime.onMessage.addListener((msg, _sender, reply) => {
