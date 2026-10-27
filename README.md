@@ -60,6 +60,7 @@ new token.
 - The one Home Assistant address you enter (requested when you save).
 - `storage`: keeps that address and your Home Assistant token on your computer.
 - `notifications`: to tell you the result.
+- `alarms`: to switch the icon to EXP when the token expires.
 
 The token goes only to your Home Assistant. There is no other network access,
 analytics or tracking. See [SECURITY.md](SECURITY.md) to report a problem.

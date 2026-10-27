@@ -24,7 +24,7 @@ jobs:
         run: |
           node -e '
             const m = JSON.parse(require("fs").readFileSync("extension/manifest.json", "utf8"));
-            const allowed = ["cookies", "storage", "notifications"];
+            const allowed = ["cookies", "storage", "notifications", "alarms"];
             const extra = m.permissions.filter((p) => !allowed.includes(p));
             if (m.manifest_version !== 3 || extra.length) { console.error("unexpected permissions:", extra); process.exit(1); }
           '
